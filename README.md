@@ -5,7 +5,7 @@ NodeJS for Beginners
 - [x] Mini Task #1: GitLab Instructions
 - [x] Mini Task #2
 - [x] Mini Task #3
-- [] Mini Task #4
+- [x] Mini Task #4
 - [] Mini Task #5
 - [] Mini Task #6
 - [] Mini Task #7
