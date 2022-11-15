@@ -13,7 +13,7 @@ NodeJS for Beginners
 - [X] Mini Task #9
 - [X] Mini Task #10
 - [X] Mini Task #11
-- [] Mini Task #12
+- [X] Mini Task #12
 - [X] Mini Task #13
 - [X] Mini Task #14
 - [X] Mini Task #15
