@@ -18,5 +18,5 @@ NodeJS for Beginners
 - [X] Mini Task #14
 - [X] Mini Task #15
 - [X] Mini Task #16
-- [] Mini Task #17
+- [X] Mini Task #17
 - [] Final Project
