@@ -14,7 +14,6 @@ module.exports = async (req, res, next) => {
       error.statusCode = 401;
       throw error;
     }
-    req.id = decodedToken.id;
     req.mongoDB_id = decodedToken._id;
     next();
   } catch (err) {

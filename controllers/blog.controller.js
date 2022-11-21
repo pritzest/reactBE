@@ -53,6 +53,33 @@ exports.getOneBlog = async (req, res, next) => {
     next(err);
   }
 };
+exports.getUserPosts = async (req,res,next)=>{
+  const title = req.query.title;
+  const regex = new RegExp(title, "i");
+  try {
+    const blogs = await Blog.find({user_id: req.mongoDB_id})
+      const deletedBlogs = blogs.filter((blog) => {
+        return (
+          blog.deleted_at !== null &&
+          regex.test(blog.title)
+        );
+      });
+      const draftBlogs = blogs.filter((blog) => {
+        return blog.is_draft !== false;
+      });
+      const userBlogs = blogs.filter((blog) => {
+        return blog.deleted_at === null && blog.is_draft === false && regex.test(blog.title);
+      });
+    return res.status(200).json({
+      message: "Blogs loaded succesfully",
+      deletedBlogs,
+      draftBlogs,
+      userBlogs
+    });
+  } catch (err) {
+    next(err);
+  }
+}
 
 exports.postBlog = async (req, res, next) => {
   const errors = validationResult(req);
