@@ -2,13 +2,14 @@ const User = require("../models/user");
 const md5 = require("md5");
 const JWTSign = require("../utils/jwt-sign");
 const { validationResult } = require("express-validator");
+const Blog = require("../models/blog");
 
 //username, password, first_name, last_name, email, profile_picture_url
 exports.postSignup = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         console.log(errors);
-        return res.status(422).json({ message: errors.array()[0].msg });
+        return res.status(422).json({ message: errors.array() });
     }
     const { username, password, first_name, last_name, email } = req.body;
     try {
@@ -49,7 +50,7 @@ exports.postSignup = async (req, res, next) => {
 exports.postLogin = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ message: errors.array()[0].msg });
+        return res.status(422).json({ message: errors.array() });
     }
     const { email, password } = req.body;
     try {
@@ -73,6 +74,7 @@ exports.postLogin = async (req, res, next) => {
         return res.status(200).json({
             message: "Login Succesful",
             token,
+            _id: user._id,
         });
     } catch (err) {
         next(err);
@@ -81,15 +83,28 @@ exports.postLogin = async (req, res, next) => {
 
 exports.getUserProfile = async (req, res, next) => {
     try {
-        const user = User.findById(req.mongoDB_id).select("-password");
+        const user = await User.findById(req.mongoDB_id).select("-password");
         if (!user) {
             const error = new Error("User does not exist.");
             error.statusCode = 403;
             throw error;
         }
+        const blogs = await Blog.find({ user_id: req.mongoDB_id });
+        const deletedBlogs = blogs.filter((blog) => {
+            return blog.deleted_at !== null;
+        });
+        const draftBlogs = blogs.filter((blog) => {
+            return blog.is_draft !== false;
+        });
+        const userBlogs = blogs.filter((blog) => {
+            return blog.deleted_at === null && blog.is_draft === false;
+        });
         return res.status(200).json({
             message: "User succesfully retrieved",
             user,
+            deletedBlogs: deletedBlogs.length,
+            draftBlogs: draftBlogs.length,
+            userBlogs: userBlogs.length,
         });
     } catch (err) {
         next(err);
@@ -105,23 +120,24 @@ exports.updateUserProfile = async (req, res, next) => {
             error.statusCode = 403;
             throw error;
         }
-        let thisUser = user.username === username || user.email === email;
         const exists = await User.findOne({
             $or: [{ email }, { username }],
+            _id: { $ne: req.mongoDB_id },
         });
-        if (exists && !thisUser) {
+        if (exists) {
             const error = new Error(
                 "User with that email/username already exists."
             );
             error.statusCode = 403;
             throw error;
         }
+        // console.log(password, user.password);
         username = username || user.username;
         first_name = first_name || user.first_name;
         last_name = last_name || user.last_name;
-        password = password || user.password;
         email = email || user.email;
-        if (password !== user.password) {
+        console.log(password, user.password);
+        if (password && md5(password) !== user.password) {
             if (user.password_chances >= 3) {
                 const error = new Error(
                     "Password limit reached. You cannot change your password anymore."
@@ -145,7 +161,15 @@ exports.updateUserProfile = async (req, res, next) => {
         } else {
             await User.updateOne(
                 { _id: req.mongoDB_id },
-                { $set: { username, first_name, last_name, email, password } }
+                {
+                    $set: {
+                        username,
+                        first_name,
+                        last_name,
+                        email,
+                        password: user.password,
+                    },
+                }
             );
         }
         return res.status(201).json({

@@ -58,7 +58,14 @@ Monday
 [/] Frontend Html
 
 Tueday
-[] React
+[/] React
+
 Wednesday
-[] Testing
-[] Deployment
+[] css blogs
+[] navbar active links
+
+[] logout
+[X] edit-post
+[] edit-profile
+[] delete
+[] invalid route -> login

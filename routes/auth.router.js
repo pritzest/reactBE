@@ -14,14 +14,14 @@ router.route("/login").post(loginValidator, authController.postLogin);
 router
     .route("/signup")
     .post(
-        multer.single("cover_picture_url"),
+        multer.single("profile_picture_url"),
         signUpValidator,
         authController.postSignup
     );
 
 router
     .route("/profile")
-    .get(authController.getUserProfile)
+    .get(isAuth, authController.getUserProfile)
     .put(isAuth, updateProfileValidator, authController.updateUserProfile)
     .patch(
         isAuth,
