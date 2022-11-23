@@ -5,15 +5,14 @@ const path = require("path");
 
 exports.getBlogs = async (req, res, next) => {
     let filterBlogs;
-    const page = req.query.page || 1;
-    const perPage = req.query.perPage || 20;
+    // const page = req.query.page || 1;
+    // const perPage = req.query.perPage || 20;
     const title = req.query.title;
     const regex = new RegExp(title, "i");
     try {
-        const blogs = await Blog.find()
-            .populate("user_id")
-            .limit(perPage)
-            .skip((page - 1) * perPage);
+        const blogs = await Blog.find().populate("user_id");
+        // .limit(perPage)
+        // .skip((page - 1) * perPage);
         if (title) {
             filterBlogs = blogs.filter((blog) => {
                 return (
@@ -27,6 +26,7 @@ exports.getBlogs = async (req, res, next) => {
                 return blog.deleted_at === null && blog.is_draft === false;
             });
         }
+        console.log(filterBlogs, title);
         return res.status(200).json({
             message: "Blogs loaded succesfully",
             blogs: filterBlogs,

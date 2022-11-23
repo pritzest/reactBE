@@ -75,6 +75,7 @@ exports.postLogin = async (req, res, next) => {
             message: "Login Succesful",
             token,
             _id: user._id,
+            username: user.username,
         });
     } catch (err) {
         next(err);

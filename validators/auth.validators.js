@@ -54,7 +54,6 @@ const updateProfileValidator = [
     body("username").trim().isAlphanumeric().not().isEmpty().optional(),
     body("password")
         .trim()
-        .optional()
         .isAlphanumeric()
         .withMessage(
             "Invalid Password. Please enter a password use Alphanumeric Characters only."
@@ -62,7 +61,8 @@ const updateProfileValidator = [
         .isLength({ min: 5 })
         .withMessage(
             "Invalid Password. Please enter a password with atleast 5 characters."
-        ),
+        )
+        .optional({ nullable: true, checkFalsy: true }),
     body("first_name", "Please use alphabets only for the first name.")
         .trim()
         .optional()
