@@ -6,11 +6,13 @@ const Blog = require("../models/blog");
 
 //username, password, first_name, last_name, email, profile_picture_url
 exports.postSignup = async (req, res, next) => {
+    //used validationResult to return the errors in res.status (can be accessed in frotnend)
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         console.log(errors);
         return res.status(422).json({ message: errors.array() });
     }
+
     const { username, password, first_name, last_name, email } = req.body;
     try {
         const isExisting = await User.findOne({
@@ -22,6 +24,7 @@ exports.postSignup = async (req, res, next) => {
             error.statusCode = 403;
             throw error;
         }
+        // if no file/profile picture has been uploaded
         if (!req.file) {
             const error = new Error("Picture is required.");
             error.statusCode = 422;
