@@ -112,6 +112,10 @@ exports.getUserProfile = async (req, res, next) => {
 };
 
 exports.updateUserProfile = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ message: errors.array() });
+    }
     let { username, first_name, last_name, email, password } = req.body;
     try {
         const user = await User.findById(req.mongoDB_id);
@@ -132,11 +136,8 @@ exports.updateUserProfile = async (req, res, next) => {
             throw error;
         }
         // console.log(password, user.password);
-        username = username || user.username;
-        first_name = first_name || user.first_name;
-        last_name = last_name || user.last_name;
-        email = email || user.email;
         console.log(password, user.password);
+        console.log(username, first_name, last_name, email);
         if (password && md5(password) !== user.password) {
             if (user.password_chances >= 3) {
                 const error = new Error(

@@ -67,5 +67,5 @@ Wednesday
 [] logout
 [X] edit-post
 [] edit-profile
-[] delete
+[X] delete
 [] invalid route -> login

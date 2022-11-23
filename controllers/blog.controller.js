@@ -68,7 +68,7 @@ exports.getUserPosts = async (req, res, next) => {
             return blog.deleted_at !== null && regex.test(blog.title);
         });
         const draftBlogs = blogs.filter((blog) => {
-            return blog.is_draft !== false;
+            return blog.is_draft !== false && blog.deleted_at === null;
         });
         const userBlogs = blogs.filter((blog) => {
             return (
@@ -91,7 +91,7 @@ exports.getUserPosts = async (req, res, next) => {
 exports.postBlog = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ message: errors.array()[0].msg });
+        return res.status(422).json({ message: errors.array() });
     }
     const { title, description, user_id } = req.body;
     try {
