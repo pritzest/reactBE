@@ -30,7 +30,7 @@ mongoose
     })
     .then((result) => {
         console.log("Connected to Databasehaha");
-        app.listen(`${process.env.PORT}`, () => {
+        app.listen(process.env.PORT || 8000, () => {
             console.log(`Connected to  PORT:${process.env.PORT}`);
         });
     })
