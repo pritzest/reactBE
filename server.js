@@ -29,7 +29,7 @@ mongoose
         useUnifiedTopology: true,
     })
     .then((result) => {
-        console.log("Connected to Database");
+        console.log("Connected to Databasehaha");
         app.listen(`${process.env.PORT}`, () => {
             console.log(`Connected to  PORT:${process.env.PORT}`);
         });
