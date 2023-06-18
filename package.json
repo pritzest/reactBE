@@ -1,30 +1,30 @@
 {
-    "name": "nodejs-mini-pritz",
-    "version": "1.0.0",
-    "description": "Final Project",
-    "main": "index.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "node server.js"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git@gitlab.stratpoint.dev:joshuapritz.estrada/nodejs-mini-pritz.git"
-    },
-    "author": "",
-    "license": "ISC",
-    "dependencies": {
-        "cors": "^2.8.5",
-        "dotenv": "^16.0.3",
-        "express": "^4.18.2",
-        "express-validator": "^6.14.2",
-        "jsonwebtoken": "^8.5.1",
-        "md5": "^2.3.0",
-        "mongoose": "^6.7.2",
-        "multer": "^1.4.5-lts.1",
-        "uuid": "^9.0.0"
-    },
-    "devDependencies": {
-        "nodemon": "^2.0.20"
-    }
+	"name": "nodejs-mini-pritz",
+	"version": "1.0.0",
+	"description": "Final Project",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "nodemon server.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git@gitlab.stratpoint.dev:joshuapritz.estrada/nodejs-mini-pritz.git"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"cors": "^2.8.5",
+		"dotenv": "^16.0.3",
+		"express": "^4.18.2",
+		"express-validator": "^6.14.2",
+		"jsonwebtoken": "^8.5.1",
+		"md5": "^2.3.0",
+		"mongoose": "^6.7.2",
+		"multer": "^1.4.5-lts.1",
+		"uuid": "^9.0.0"
+	},
+	"devDependencies": {
+		"nodemon": "^2.0.20"
+	}
 }
