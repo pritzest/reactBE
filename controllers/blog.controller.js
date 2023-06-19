@@ -1,20 +1,53 @@
 const Blog = require("../models/blog");
+const Like = require("../models/likes.model");
+const Comment = require("../models/comments.model");
 const { validationResult } = require("express-validator");
 const fs = require("fs");
 const path = require("path");
 
 exports.getBlogs = async (req, res, next) => {
 	try {
-		const blogs = await Blog.find().populate({
-			path: "user_id",
-			select: "first_name last_name profile_picture_url",
-		});
+		const postsData = [];
+		const blogs = await Blog.find()
+			.sort({ createdAt: -1 })
+			.populate("user_id");
+
+		for await (const blog of blogs) {
+			const likes = [];
+			const comments = [];
+
+			const userLikes = await Like.find({
+				blogId: blog._id,
+				// action: true,
+			}).select("userId _id");
+
+			const userComments = await Comment.find({
+				blogId: blog._id,
+			}).select("userId _id");
+
+			userLikes.forEach(function (like) {
+				likes.push(like.user_id);
+			});
+
+			userComments.forEach(function (comment) {
+				comments.push(comment.user_id);
+			});
+
+			const updatedPostData = {
+				...blog._doc,
+				likes,
+				comments,
+			};
+
+			postsData.push(updatedPostData);
+		}
 
 		return res.status(200).json({
 			message: "Post loaded succesfully",
-			blogs,
+			postsData,
 		});
 	} catch (err) {
+		console.log(err);
 		next(err);
 	}
 };
@@ -89,28 +122,6 @@ exports.postBlog = async (req, res, next) => {
 
 		return res.status(201).json({
 			message: "Post created succesfully",
-			blog,
-		});
-	} catch (err) {
-		next(err);
-	}
-};
-
-exports.postDraft = async (req, res, next) => {
-	const errors = validationResult(req);
-	if (!errors.isEmpty()) {
-		return res.status(422).json({ message: errors.array() });
-	}
-	const { title, description } = req.body;
-	try {
-		const blog = await Blog.create({
-			title,
-			description,
-			is_draft: true,
-			user_id: req.mongoDB_id,
-		});
-		return res.status(201).json({
-			message: "Blog created succesfully",
 			blog,
 		});
 	} catch (err) {
