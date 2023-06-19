@@ -13,7 +13,7 @@ exports.postLike = async (req, res, next) => {
 	const { blog_id } = req.params;
 	const { isLiked } = req.body;
 	try {
-		if (isLiked) {
+		if (!isLiked) {
 			await Like.updateOne(
 				{
 					blogId: blog_id,
@@ -29,7 +29,7 @@ exports.postLike = async (req, res, next) => {
 			await Like.deleteOne({ blogId: blog_id, userId: req.mongoDB_id });
 		}
 
-		res.json({ message: "aaa" });
+		res.json({ message: "Post liked succesfully" });
 	} catch (err) {
 		next(err);
 	}

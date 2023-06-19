@@ -26,11 +26,11 @@ exports.getBlogs = async (req, res, next) => {
 			}).select("userId _id");
 
 			userLikes.forEach(function (like) {
-				likes.push(like.user_id);
+				likes.push(like.userId);
 			});
 
 			userComments.forEach(function (comment) {
-				comments.push(comment.user_id);
+				comments.push(comment.userId);
 			});
 
 			const updatedPostData = {
