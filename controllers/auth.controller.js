@@ -46,6 +46,11 @@ exports.postSignup = async (req, res, next) => {
 			name: user.first_name + " " + user.last_name,
 			email: user.email,
 			_id: user._id,
+			profilePicture: user.profile_picture_url,
+			firstName: user.first_name,
+			lastName: user.last_name,
+			birthday: user.birthday,
+			bio: user.bio
 		});
 		return res.status(201).json({
 			message: "User created succesfully.",
@@ -79,6 +84,11 @@ exports.postLogin = async (req, res, next) => {
 			name: user.first_name + " " + user.last_name,
 			email: user.email,
 			_id: user._id,
+			profilePicture: user.profile_picture_url,
+			firstName: user.first_name,
+			lastName: user.last_name,
+			birthday: user.birthday,
+			bio: user.bio
 		});
 		return res.status(200).json({
 			message: "Login Succesful",
@@ -116,7 +126,7 @@ exports.updateUserProfile = async (req, res, next) => {
 	if (!errors.isEmpty()) {
 		return res.status(422).json({ message: errors.array() });
 	}
-	let { username, first_name, last_name, email, password } = req.body;
+	let { firstName, lastName, bio, birthday } = req.body;
 	try {
 		const user = await User.findById(req.mongoDB_id);
 		if (!user) {
@@ -124,8 +134,9 @@ exports.updateUserProfile = async (req, res, next) => {
 			error.statusCode = 403;
 			throw error;
 		}
+		const email = 'dummy@stratpoint.com'
 		const exists = await User.findOne({
-			$or: [{ email }, { username }],
+			$or: [{ email }],
 			_id: { $ne: req.mongoDB_id },
 		});
 		if (exists) {
@@ -133,46 +144,32 @@ exports.updateUserProfile = async (req, res, next) => {
 			error.statusCode = 403;
 			throw error;
 		}
-		// console.log(password, user.password);
-		console.log(password, user.password);
-		console.log(username, first_name, last_name, email);
-		if (password && md5(password) !== user.password) {
-			if (user.password_chances >= 3) {
-				const error = new Error(
-					"Password limit reached. You cannot change your password anymore."
-				);
-				error.statusCode = 403;
-				throw error;
-			}
-			await User.updateOne(
-				{ _id: req.mongoDB_id },
-				{
-					$set: {
-						username,
-						first_name,
-						last_name,
-						email,
-						password: md5(password),
-						password_chances: user.password_chances + 1,
-					},
-				}
-			);
-		} else {
-			await User.updateOne(
-				{ _id: req.mongoDB_id },
-				{
-					$set: {
-						username,
-						first_name,
-						last_name,
-						email,
-						password: user.password,
-					},
-				}
-			);
-		}
-		return res.status(201).json({
+	
+
+		user.first_name = firstName;
+		user.last_name = lastName;
+		user.birthday = birthday;
+		user.bio = bio;
+
+		const updatedUser = await user.save()
+
+		console.log(updatedUser)
+
+		const token = JWTSign({
+			id: updatedUser.id,
+			name: updatedUser.first_name + " " + updatedUser.last_name,
+			email: updatedUser.email,
+			_id: updatedUser._id,
+			profilePicture: updatedUser.profile_picture_url,
+			firstName: updatedUser.first_name,
+			lastName: updatedUser.last_name,
+			birthday: updatedUser.birthday,
+			bio: updatedUser.bio
+		});
+
+		return res.status(200).json({
 			message: "User updated",
+			token
 		});
 	} catch (err) {
 		next(err);

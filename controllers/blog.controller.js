@@ -23,14 +23,14 @@ exports.getBlogs = async (req, res, next) => {
 
 			const userComments = await Comment.find({
 				blogId: blog._id,
-			}).select("userId _id");
+			}).select("userId _id description");
 
 			userLikes.forEach(function (like) {
 				likes.push(like.userId);
 			});
 
 			userComments.forEach(function (comment) {
-				comments.push(comment.userId);
+				comments.push({id: comment._id,userId: comment.userId, description: comment.description});
 			});
 
 			const updatedPostData = {

@@ -6,6 +6,6 @@ const commentController = require("../controllers/comment.controller");
 router
 	.route("/:blog_id")
 	.get(isAuth, commentController.getComment)
-	.put(isAuth, commentController.postComment);
+	.post(isAuth, commentController.postComment);
 
 module.exports = router;
