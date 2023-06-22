@@ -23,14 +23,20 @@ exports.getBlogs = async (req, res, next) => {
 
 			const userComments = await Comment.find({
 				blogId: blog._id,
-			}).select("userId _id description");
+			})
+				.populate("userId")
+				.select("userId _id description");
 
 			userLikes.forEach(function (like) {
 				likes.push(like.userId);
 			});
 
 			userComments.forEach(function (comment) {
-				comments.push({id: comment._id,userId: comment.userId, description: comment.description});
+				comments.push({
+					id: comment._id,
+					userId: comment.userId,
+					description: comment.description,
+				});
 			});
 
 			const updatedPostData = {
@@ -79,29 +85,13 @@ exports.getOneBlog = async (req, res, next) => {
 };
 exports.getUserPosts = async (req, res, next) => {
 	const title = req.query.title;
-	const regex = new RegExp(title, "i");
 	try {
 		const blogs = await Blog.find({ user_id: req.mongoDB_id }).populate(
 			"user_id"
 		);
-		const deletedBlogs = blogs.filter((blog) => {
-			return blog.deleted_at !== null && regex.test(blog.title);
-		});
-		const draftBlogs = blogs.filter((blog) => {
-			return blog.is_draft !== false && blog.deleted_at === null;
-		});
-		const userBlogs = blogs.filter((blog) => {
-			return (
-				blog.deleted_at === null &&
-				blog.is_draft === false &&
-				regex.test(blog.title)
-			);
-		});
 		return res.status(200).json({
 			message: "Blogs loaded succesfully",
-			deletedBlogs,
-			draftBlogs,
-			userBlogs,
+			blogs,
 		});
 	} catch (err) {
 		next(err);

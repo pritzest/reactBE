@@ -22,11 +22,7 @@ router
 router
 	.route("/profile")
 	.put(isAuth, updateProfileValidator, authController.updateUserProfile)
-	.patch(
-		isAuth,
-		multer.single("profile_picture"),
-		authController.updateProfilePicture
-	);
+	.patch(isAuth, authController.updateProfilePicture);
 
 router.route("/profile/:id").get(isAuth, authController.getUserProfile);
 

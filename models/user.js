@@ -30,7 +30,6 @@ const userSchema = new Schema(
 		},
 		profile_picture_url: {
 			type: String,
-			required: true,
 		},
 		password_chances: {
 			type: Number,

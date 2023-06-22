@@ -3,6 +3,7 @@ const md5 = require("md5");
 const JWTSign = require("../utils/jwt-sign");
 const { validationResult } = require("express-validator");
 const Blog = require("../models/blog");
+const { v2: cloudinary } = require("cloudinary");
 
 //username, password, first_name, last_name, email, profile_picture_url
 exports.postSignup = async (req, res, next) => {
@@ -38,7 +39,6 @@ exports.postSignup = async (req, res, next) => {
 			first_name,
 			last_name,
 			email,
-			profile_picture_url: "public/images/avatar.jpg",
 		});
 		const user = await newUser.save();
 		const token = JWTSign({
@@ -50,7 +50,7 @@ exports.postSignup = async (req, res, next) => {
 			firstName: user.first_name,
 			lastName: user.last_name,
 			birthday: user.birthday,
-			bio: user.bio
+			bio: user.bio,
 		});
 		return res.status(201).json({
 			message: "User created succesfully.",
@@ -88,7 +88,7 @@ exports.postLogin = async (req, res, next) => {
 			firstName: user.first_name,
 			lastName: user.last_name,
 			birthday: user.birthday,
-			bio: user.bio
+			bio: user.bio,
 		});
 		return res.status(200).json({
 			message: "Login Succesful",
@@ -134,7 +134,7 @@ exports.updateUserProfile = async (req, res, next) => {
 			error.statusCode = 403;
 			throw error;
 		}
-		const email = 'dummy@stratpoint.com'
+		const email = "dummy@stratpoint.com";
 		const exists = await User.findOne({
 			$or: [{ email }],
 			_id: { $ne: req.mongoDB_id },
@@ -144,16 +144,15 @@ exports.updateUserProfile = async (req, res, next) => {
 			error.statusCode = 403;
 			throw error;
 		}
-	
 
 		user.first_name = firstName;
 		user.last_name = lastName;
 		user.birthday = birthday;
 		user.bio = bio;
 
-		const updatedUser = await user.save()
+		const updatedUser = await user.save();
 
-		console.log(updatedUser)
+		console.log(updatedUser);
 
 		const token = JWTSign({
 			id: updatedUser.id,
@@ -164,12 +163,12 @@ exports.updateUserProfile = async (req, res, next) => {
 			firstName: updatedUser.first_name,
 			lastName: updatedUser.last_name,
 			birthday: updatedUser.birthday,
-			bio: updatedUser.bio
+			bio: updatedUser.bio,
 		});
 
 		return res.status(200).json({
 			message: "User updated",
-			token
+			token,
 		});
 	} catch (err) {
 		next(err);
@@ -177,20 +176,44 @@ exports.updateUserProfile = async (req, res, next) => {
 };
 exports.updateProfilePicture = async (req, res, next) => {
 	try {
-		if (!req.file) {
+		const profilePicture = req.body.profile_picture_url;
+
+		if (!profilePicture) {
 			const error = new Error("Picture is required.");
 			error.statusCode = 422;
 			throw error;
 		}
-		const profile_picture_url = req.file.path.split("\\").join("/");
-		await User.updateOne(
-			{ _id: req.mongoDB_id },
-			{ $set: { profile_picture_url } }
+
+		const uploadedPic = await cloudinary.uploader.upload(
+			profilePicture,
+			{}
 		);
-		return res.status(201).json({
-			message: "Profile Picture updated succesfully.",
+
+		const updatedUser = await User.findOneAndUpdate(
+			{ _id: req.mongoDB_id },
+			{
+				profile_picture_url: uploadedPic.url,
+			},
+			{ new: true }
+		);
+
+		const token = JWTSign({
+			id: updatedUser.id,
+			name: updatedUser.first_name + " " + updatedUser.last_name,
+			email: updatedUser.email,
+			_id: updatedUser._id,
+			profilePicture: updatedUser.profile_picture_url,
+			firstName: updatedUser.first_name,
+			lastName: updatedUser.last_name,
+			birthday: updatedUser.birthday,
+			bio: updatedUser.bio,
+		});
+
+		return res.status(200).json({
+			message: "User profile picture saved",
+			token,
 		});
 	} catch (err) {
-		next(err);
+		console.log(err);
 	}
 };
