@@ -1,7 +1,6 @@
 const express = require("express");
 const blogController = require("../controllers/blog.controller");
 const isAuth = require("../middlewares/isAuth");
-const multer = require("../middlewares/multer");
 const { postBlogValidator } = require("../validators/blog.validators");
 
 const router = express.Router();
@@ -19,7 +18,6 @@ router
 	.delete(isAuth, blogController.deleteBlog)
 	.put(
 		isAuth,
-		multer.single("cover_picture_url"),
 		postBlogValidator,
 		blogController.updateBlog
 	);

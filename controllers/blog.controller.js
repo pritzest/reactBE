@@ -23,7 +23,8 @@ exports.getBlogs = async (req, res, next) => {
 
 			const userComments = await Comment.find({
 				blogId: blog._id,
-			})
+			}).sort({ createdAt: 1 })
+
 				.populate("userId")
 				.select("userId _id description");
 

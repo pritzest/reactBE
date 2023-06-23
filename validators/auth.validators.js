@@ -24,16 +24,20 @@ const signUpValidator = [
 		.withMessage(
 			"Invalid Password. Please enter a password with atleast 5 characters."
 		),
-	body("first_name", "Please use alphabets only for the first name.")
+	body("first_name")
 		.trim()
-		.isAlpha("en-US", { ignore: " " })
 		.not()
-		.isEmpty(),
-	body("last_name", "Please use alphabets only for the last name.")
+		.isEmpty()
+		.withMessage('First name is required')
+		.isAlpha("en-US", { ignore: " " })
+		.withMessage('Please use alphabets only for the first name.	'),
+	body("last_name")
 		.trim()
-		.isAlpha("en-US", { ignore: " " })
 		.not()
-		.isEmpty(),
+		.isEmpty()
+		.withMessage('Last name is required')
+		.isAlpha("en-US", { ignore: " " })
+		.withMessage('Please use alphabets only for the last name.'),
 	body("email", "Please use a valid stratpoint email.")
 		.trim()
 		.normalizeEmail()

@@ -2,7 +2,6 @@ const express = require("express");
 const authController = require("../controllers/auth.controller");
 const router = express.Router();
 const isAuth = require("../middlewares/isAuth");
-const multer = require("../middlewares/multer");
 const {
 	loginValidator,
 	signUpValidator,
@@ -14,7 +13,6 @@ router.route("/login").post(loginValidator, authController.postLogin);
 router
 	.route("/signup")
 	.post(
-		multer.single("profile_picture"),
 		signUpValidator,
 		authController.postSignup
 	);

@@ -177,7 +177,7 @@ exports.updateUserProfile = async (req, res, next) => {
 exports.updateProfilePicture = async (req, res, next) => {
 	try {
 		const profilePicture = req.body.profile_picture_url;
-
+		
 		if (!profilePicture) {
 			const error = new Error("Picture is required.");
 			error.statusCode = 422;
@@ -186,8 +186,8 @@ exports.updateProfilePicture = async (req, res, next) => {
 
 		const uploadedPic = await cloudinary.uploader.upload(
 			profilePicture,
-			{}
 		);
+
 
 		const updatedUser = await User.findOneAndUpdate(
 			{ _id: req.mongoDB_id },
@@ -197,17 +197,19 @@ exports.updateProfilePicture = async (req, res, next) => {
 			{ new: true }
 		);
 
+
 		const token = JWTSign({
 			id: updatedUser.id,
 			name: updatedUser.first_name + " " + updatedUser.last_name,
 			email: updatedUser.email,
 			_id: updatedUser._id,
-			profilePicture: updatedUser.profile_picture_url,
+			profilePicture: uploadedPic.url,
 			firstName: updatedUser.first_name,
 			lastName: updatedUser.last_name,
 			birthday: updatedUser.birthday,
 			bio: updatedUser.bio,
 		});
+
 
 		return res.status(200).json({
 			message: "User profile picture saved",
