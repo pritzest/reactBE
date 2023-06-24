@@ -14,13 +14,13 @@ exports.postComment = async (req, res, next) => {
 	const { description } = req.body;
 	try {
 		const comment = await Comment.create({
-			userId: req.mongoDB_id,	
+			userId: req.mongoDB_id,
 			blogId: blog_id,
 			description,
 		});
 
-		const newComment = await comment.populate('userId')
-		console.log(newComment)
+		const newComment = await comment.populate("userId");
+		console.log(newComment);
 		res.json({ comment: newComment });
 	} catch (err) {
 		next(err);

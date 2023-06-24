@@ -23,10 +23,11 @@ exports.getBlogs = async (req, res, next) => {
 
 			const userComments = await Comment.find({
 				blogId: blog._id,
-			}).sort({ createdAt: 1 })
+			})
+				.sort({ createdAt: 1 })
 
 				.populate("userId")
-				.select("userId _id description");
+				.select("userId _id description createdAt");
 
 			userLikes.forEach(function (like) {
 				likes.push(like.userId);
@@ -37,6 +38,7 @@ exports.getBlogs = async (req, res, next) => {
 					id: comment._id,
 					userId: comment.userId,
 					description: comment.description,
+					createdAt: comment.createdAt,
 				});
 			});
 
@@ -63,11 +65,45 @@ exports.getOneBlog = async (req, res, next) => {
 	const { blog_id } = req.params;
 	try {
 		const blog = await Blog.findOne({
-			id: blog_id,
+			_id: blog_id,
 		}).populate({
 			path: "user_id",
-			select: "first_name last_name profile_picture_url",
+			select: "-password",
 		});
+		const likes = [];
+		const comments = [];
+
+		const userLikes = await Like.find({
+			blogId: blog._id,
+			// action: true,
+		}).select("userId _id");
+
+		const userComments = await Comment.find({
+			blogId: blog._id,
+		})
+			.sort({ createdAt: 1 })
+
+			.populate("userId")
+			.select("userId _id description createdAt");
+
+		userLikes.forEach(function (like) {
+			likes.push(like.userId);
+		});
+
+		userComments.forEach(function (comment) {
+			comments.push({
+				id: comment._id,
+				userId: comment.userId,
+				description: comment.description,
+				createdAt: comment.createdAt,
+			});
+		});
+
+		const updatedPostData = {
+			...blog._doc,
+			likes,
+			comments,
+		};
 
 		if (!blog) {
 			return res.status(404).json({
@@ -78,21 +114,63 @@ exports.getOneBlog = async (req, res, next) => {
 
 		return res.status(200).json({
 			message: "Post succesfully loaded",
-			blog,
+			blog: updatedPostData,
 		});
 	} catch (err) {
 		next(err);
 	}
 };
 exports.getUserPosts = async (req, res, next) => {
-	const title = req.query.title;
+	const { id } = req.params;
+
 	try {
-		const blogs = await Blog.find({ user_id: req.mongoDB_id }).populate(
-			"user_id"
-		);
+		const postsData = [];
+		const blogs = await Blog.find({ user_id: id })
+			.sort({ createdAt: -1 })
+			.populate("user_id");
+
+		for await (const blog of blogs) {
+			const likes = [];
+			const comments = [];
+
+			const userLikes = await Like.find({
+				blogId: blog._id,
+				// action: true,
+			}).select("userId _id");
+
+			const userComments = await Comment.find({
+				blogId: blog._id,
+			})
+				.sort({ createdAt: 1 })
+
+				.populate("userId")
+				.select("userId _id description createdAt");
+
+			userLikes.forEach(function (like) {
+				likes.push(like.userId);
+			});
+
+			userComments.forEach(function (comment) {
+				comments.push({
+					id: comment._id,
+					userId: comment.userId,
+					description: comment.description,
+					createdAt: comment.createdAt,
+				});
+			});
+
+			const updatedPostData = {
+				...blog._doc,
+				likes,
+				comments,
+			};
+
+			postsData.push(updatedPostData);
+		}
+
 		return res.status(200).json({
-			message: "Blogs loaded succesfully",
-			blogs,
+			message: "Post loaded succesfully",
+			postsData,
 		});
 	} catch (err) {
 		next(err);
@@ -111,6 +189,8 @@ exports.postBlog = async (req, res, next) => {
 			user_id: req.mongoDB_id,
 		});
 
+		await blog.populate({ path: "user_id", select: "-password" });
+
 		return res.status(201).json({
 			message: "Post created succesfully",
 			blog,
@@ -123,7 +203,7 @@ exports.postBlog = async (req, res, next) => {
 exports.deleteBlog = async (req, res, next) => {
 	const { blog_id } = req.params;
 	try {
-		const blog = await Blog.findOne({ id: blog_id });
+		const blog = await Blog.findOne({ _id: blog_id });
 		if (!blog) {
 			const error = new Error("Blog cannot be found");
 			error.statusCode = 404;
@@ -134,10 +214,10 @@ exports.deleteBlog = async (req, res, next) => {
 			error.statusCode = 403;
 			throw error;
 		}
-		await Blog.updateOne(
-			{ id: blog.id },
-			{ $set: { deleted_at: new Date().toISOString() } }
-		);
+		await Blog.deleteOne({ _id: blog_id });
+		await Comment.deleteMany({
+			blogId: blog_id,
+		});
 		return res.status(200).json({
 			message: "Blog successfully deleted",
 		});

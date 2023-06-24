@@ -10,16 +10,12 @@ router
 	.get(isAuth, blogController.getBlogs)
 	.post(isAuth, postBlogValidator, blogController.postBlog);
 
-router.route("/userblogs").get(isAuth, blogController.getUserPosts);
+router.route("/userblogs/:id").get(isAuth, blogController.getUserPosts);
 
 router
 	.route("/:blog_id")
 	.get(isAuth, blogController.getOneBlog)
 	.delete(isAuth, blogController.deleteBlog)
-	.put(
-		isAuth,
-		postBlogValidator,
-		blogController.updateBlog
-	);
+	.put(isAuth, postBlogValidator, blogController.updateBlog);
 
 module.exports = router;
